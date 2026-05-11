@@ -17,7 +17,7 @@ const MacroBadge: React.FC<{ label: string; value: number; unit: string; color: 
 
 // ── Molecules ──────────────────────────────────────────────────────────────────
 
-const MealCard: React.FC<{ meal: Meal; planFormat: string }> = ({ meal, planFormat }) => {
+const MealCard: React.FC<{ meal: Meal; planFormat: string }> = ({ meal }) => {
   const [open, setOpen] = useState(false);
   const mealTypeColors: Record<string, string> = {
     'Desayuno': '#f97316', 'Comida': '#3b82f6', 'Cena': '#8b5cf6',

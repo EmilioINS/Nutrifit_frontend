@@ -187,7 +187,6 @@ const PlanFormatEditor: React.FC<EditorProps> = ({ value, onChange }) => (
 
 function getEditorForField(
   fieldKey: string,
-  profile: Record<string, any>,
   localValue: any,
   setLocalValue: (v: any) => void
 ): React.ReactNode {
@@ -278,7 +277,7 @@ const EditProfile: React.FC = () => {
 
           {/* Editor */}
           <div style={{ marginBottom: 28 }}>
-            {getEditorForField(selectedField, profile, localValue, setLocalValue)}
+            {getEditorForField(selectedField, localValue, setLocalValue)}
           </div>
 
           {/* Save button */}

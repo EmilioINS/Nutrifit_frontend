@@ -341,7 +341,7 @@ const Dashboard: React.FC = () => {
         <nav
           role="navigation"
           aria-label="Navegación principal"
-          style={{ display: 'flex', borderTop: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(5,5,5,0.97)', backdropFilter: 'blur(12px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+          style={{ display: 'flex', borderTop: '1px solid rgba(255,255,255,0.08)', backgroundColor: 'rgba(5,5,5,0.97)', backdropFilter: 'blur(12px)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)' }}
         >
           {NAV.map(item => (
             <button

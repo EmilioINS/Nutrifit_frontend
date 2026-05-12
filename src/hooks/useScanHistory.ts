@@ -49,5 +49,20 @@ export function useScanHistory() {
     }
   }, []);
 
-  return { history, loading, fetchHistory };
+  const clearHistory = useCallback(async () => {
+    if (!window.confirm('¿Estás seguro de que deseas borrar todo el historial de escaneos? Esta acción no se puede deshacer.')) return;
+    
+    setLoading(true);
+    try {
+      await api.delete('/scan-food/history');
+      setHistory([]);
+    } catch (e) {
+      console.error('[useScanHistory] clear error', e);
+      alert('Hubo un problema al borrar el historial.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { history, loading, fetchHistory, clearHistory };
 }

@@ -63,7 +63,7 @@ const DIET_MAP: Record<string, string> = { recommended: 'Balanceada ✨', 'high-
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { history, loading: histLoading, fetchHistory } = useScanHistory();
+  const { history, loading: histLoading, fetchHistory, clearHistory } = useScanHistory();
   const { dietData, generating, loading: dietLoading, generatePlans, loadSavedPlan } = useDietPlan();
 
   const [tab, setTab] = useState<Tab>('home');
@@ -141,12 +141,23 @@ const Dashboard: React.FC = () => {
     <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Historial</h2>
-        <button
-          onClick={fetchHistory}
-          style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', fontSize: 13 }}
-        >
-          ↻ Actualizar
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {history.length > 0 && (
+            <button
+              onClick={clearHistory}
+              title="Limpiar todo el historial"
+              style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', fontSize: 13 }}
+            >
+              🗑️ Limpiar
+            </button>
+          )}
+          <button
+            onClick={fetchHistory}
+            style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', fontSize: 13 }}
+          >
+            ↻ Actualizar
+          </button>
+        </div>
       </div>
 
       {histLoading ? (

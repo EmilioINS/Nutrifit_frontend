@@ -17,7 +17,7 @@ const MacroBadge: React.FC<{ label: string; value: number; unit: string; color: 
 
 // ── Molecules ──────────────────────────────────────────────────────────────────
 
-const MealCard: React.FC<{ meal: Meal; planFormat: string }> = ({ meal }) => {
+const MealCard: React.FC<{ meal: Meal; planFormat: string; totalMeals: number; onScanMeal?: (meal: Meal, totalMeals: number) => void }> = ({ meal, totalMeals, onScanMeal }) => {
   const [open, setOpen] = useState(false);
   const mealTypeColors: Record<string, string> = {
     'Desayuno': '#f97316', 'Comida': '#3b82f6', 'Cena': '#8b5cf6',
@@ -44,6 +44,18 @@ const MealCard: React.FC<{ meal: Meal; planFormat: string }> = ({ meal }) => {
 
       {open && (
         <div style={{ padding: '0 14px 14px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          {/* Action Row */}
+          {onScanMeal && (
+            <div style={{ padding: '8px 0 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 12 }}>
+                <button 
+                  onClick={() => onScanMeal(meal, totalMeals)}
+                  style={{ background: 'linear-gradient(135deg, #4ade80, #10b981)', color: '#064e3b', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 700, width: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                >
+                  📸 Registrar esta comida
+                </button>
+            </div>
+          )}
+
           {/* Full macros */}
           <div style={{ display: 'flex', gap: 0, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 12 }}>
             <MacroBadge label="kcal"  value={meal.calories} unit=""  color="#f97316" />
@@ -77,9 +89,10 @@ const MealCard: React.FC<{ meal: Meal; planFormat: string }> = ({ meal }) => {
   );
 };
 
-const DayCard: React.FC<{ dayPlan: DayPlan; planFormat: string }> = ({ dayPlan, planFormat }) => {
+const DayCard: React.FC<{ dayPlan: DayPlan; planFormat: string; onScanMeal?: (meal: Meal, totalMeals: number) => void }> = ({ dayPlan, planFormat, onScanMeal }) => {
   const [open, setOpen] = useState(false);
   const t = dayPlan.daily_totals;
+  const totalMeals = dayPlan.meals?.length || 0;
 
   return (
     <div style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, overflow: 'hidden' }}>
@@ -100,7 +113,7 @@ const DayCard: React.FC<{ dayPlan: DayPlan; planFormat: string }> = ({ dayPlan, 
       {open && (
         <div style={{ padding: '8px 12px 12px', display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           {(dayPlan.meals || []).map((meal, i) => (
-            <MealCard key={i} meal={meal} planFormat={planFormat} />
+            <MealCard key={i} meal={meal} planFormat={planFormat} totalMeals={totalMeals} onScanMeal={onScanMeal} />
           ))}
         </div>
       )}
@@ -114,9 +127,10 @@ interface Props {
   plan: WeeklyPlan;
   planIndex: number;
   planFormat?: string;
+  onScanMeal?: (meal: Meal, totalMeals: number) => void;
 }
 
-const DietPlanCard: React.FC<Props> = ({ plan, planIndex, planFormat = 'step-by-step' }) => {
+const DietPlanCard: React.FC<Props> = ({ plan, planIndex, planFormat = 'step-by-step', onScanMeal }) => {
   const [expanded, setExpanded] = useState(planIndex === 0); // First plan open by default
   const colors = ['#4ade80', '#3b82f6'];
   const color = colors[planIndex] ?? '#9ca3af';
@@ -144,7 +158,7 @@ const DietPlanCard: React.FC<Props> = ({ plan, planIndex, planFormat = 'step-by-
       {expanded && (
         <div style={{ padding: '0 14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {(plan.days || []).map((day, i) => (
-            <DayCard key={i} dayPlan={day} planFormat={planFormat} />
+            <DayCard key={i} dayPlan={day} planFormat={planFormat} onScanMeal={onScanMeal} />
           ))}
         </div>
       )}

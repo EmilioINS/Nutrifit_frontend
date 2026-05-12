@@ -11,6 +11,7 @@ import CameraScanner from '../components/CameraScanner';
 import MacroCard from '../components/MacroCard';
 import ScanResultCard from '../components/ScanResultCard';
 import DietPlanCard from '../components/DietPlanCard';
+import StreakCard from '../components/StreakCard';
 import { useAuth } from '../hooks/useAuth';
 import { useScanHistory } from '../hooks/useScanHistory';
 import { useDietPlan } from '../hooks/useDietPlan';
@@ -68,6 +69,7 @@ const Dashboard: React.FC = () => {
 
   const [tab, setTab] = useState<Tab>('home');
   const [showScanner, setShowScanner] = useState(false);
+  const [targetMeal, setTargetMeal] = useState<{ meal: any; totalMeals: number } | undefined>(undefined);
   const [lastScan, setLastScan] = useState<ScanResult | null>(null);
   const [profile, setProfile] = useState<Profile>({});
   const [macros, setMacros] = useState<MacroTargets>({ kcal: 2000, protein: 150, carbs: 200, fat: 70 });
@@ -89,6 +91,11 @@ const Dashboard: React.FC = () => {
     setShowScanner(false);
   }, []);
 
+  const handleScanMeal = useCallback((meal: any, totalMeals: number) => {
+    setTargetMeal({ meal, totalMeals });
+    setShowScanner(true);
+  }, []);
+
   // ── TAB: Home ───────────────────────────────────────────────────────────────
 
   const HomeTab = () => (
@@ -100,6 +107,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div style={{ padding: '0 20px 100px' }}>
+        <StreakCard />
+        
         {/* Calories hero */}
         <div style={{ textAlign: 'center', margin: '16px 0 20px', padding: '24px', background: 'linear-gradient(135deg, rgba(74,222,128,0.12), rgba(16,185,129,0.06))', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 20 }}>
           <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Objetivo Calórico Diario</div>
@@ -118,7 +127,10 @@ const Dashboard: React.FC = () => {
         <button
           id="open-scanner-btn"
           className="btn"
-          onClick={() => setShowScanner(true)}
+          onClick={() => {
+            setTargetMeal(undefined);
+            setShowScanner(true);
+          }}
           style={{ width: '100%', fontSize: 16, padding: '16px' }}
         >
           📸 Escanear Comida con IA
@@ -265,7 +277,7 @@ const Dashboard: React.FC = () => {
       {dietData?.plans?.length ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {dietData.plans.map((plan, idx) => (
-            <DietPlanCard key={idx} plan={plan} planIndex={idx} />
+            <DietPlanCard key={idx} plan={plan} planIndex={idx} onScanMeal={handleScanMeal} />
           ))}
         </div>
       ) : null}
@@ -336,7 +348,7 @@ const Dashboard: React.FC = () => {
   return (
     <>
       {showScanner && (
-        <CameraScanner onClose={() => setShowScanner(false)} onResult={handleScanResult} />
+        <CameraScanner onClose={() => setShowScanner(false)} onResult={handleScanResult} targetMeal={targetMeal} />
       )}
 
       <div className="screen active" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>

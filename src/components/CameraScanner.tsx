@@ -6,15 +6,17 @@
 import React, { useRef, useState, useEffect } from 'react';
 import api from '../services/api';
 import type { ScanResult } from '../hooks/useScanHistory';
+import type { Meal } from '../hooks/useDietPlan';
 
 interface Props {
   onClose: () => void;
   onResult: (res: ScanResult) => void;
+  targetMeal?: { meal: Meal; totalMeals: number };
 }
 
 type Mode = 'camera' | 'upload';
 
-const CameraScanner: React.FC<Props> = ({ onClose, onResult }) => {
+const CameraScanner: React.FC<Props> = ({ onClose, onResult, targetMeal }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -103,14 +105,35 @@ const CameraScanner: React.FC<Props> = ({ onClose, onResult }) => {
   const sendImage = async (base64Image: string) => {
     setLoading(true);
     try {
-      const res = await api.post('/scan-food/', { image_base64: base64Image });
-      onResult(res.data);
-    } catch (err) {
+      if (targetMeal) {
+        const payload = {
+          image_base64: base64Image,
+          meal_name: targetMeal.meal.name,
+          total_expected_meals: targetMeal.totalMeals,
+          target_macros: {
+            calories: targetMeal.meal.calories,
+            protein: targetMeal.meal.protein,
+            carbs: targetMeal.meal.carbs,
+            fat: targetMeal.meal.fat
+          }
+        };
+        const res = await api.post('/scan-food/log-meal', payload);
+        alert(res.data.message || 'Comida registrada exitosamente');
+        window.dispatchEvent(new Event('streak-updated'));
+        onClose();
+      } else {
+        const res = await api.post('/scan-food/', { image_base64: base64Image });
+        onResult(res.data);
+      }
+    } catch (err: any) {
       console.error('Scan error:', err);
-      alert('Error analizando la imagen. Intenta de nuevo.');
+      const msg = err.response?.data?.detail || 'Error analizando la imagen. Intenta de nuevo.';
+      alert(msg);
     } finally {
       setLoading(false);
-      onClose();
+      if (!targetMeal) {
+          onClose();
+      }
     }
   };
 
@@ -235,7 +258,9 @@ const CameraScanner: React.FC<Props> = ({ onClose, onResult }) => {
         {/* Header */}
         <div style={S.header}>
           <button onClick={handleClose} style={S.closeBtn}>✕</button>
-          <h3 style={{ color: 'white', margin: 0, fontSize: 16 }}>Escáner de Comida</h3>
+          <h3 style={{ color: 'white', margin: 0, fontSize: 16 }}>
+            {targetMeal ? `Registrar: ${targetMeal.meal.name}` : 'Escáner de Comida'}
+          </h3>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button 
               onClick={() => setFacingMode(prev => prev === 'environment' ? 'user' : 'environment')} 

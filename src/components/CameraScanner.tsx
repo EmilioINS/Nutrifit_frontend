@@ -25,6 +25,7 @@ const CameraScanner: React.FC<Props> = ({ onClose, onResult }) => {
   const [cameraError, setCameraError] = useState('');
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null); // for upload mode
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
 
   /* ── Camera lifecycle ───────────────────────────── */
 
@@ -35,7 +36,9 @@ const CameraScanner: React.FC<Props> = ({ onClose, onResult }) => {
 
     const startCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: { ideal: facingMode } } 
+        });
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
         streamRef.current = stream;
         if (videoRef.current) videoRef.current.srcObject = stream;
@@ -52,7 +55,7 @@ const CameraScanner: React.FC<Props> = ({ onClose, onResult }) => {
       streamRef.current = null;
       setCameraReady(false);
     };
-  }, [mode]);
+  }, [mode, facingMode]);
 
   const stopCamera = () => {
     streamRef.current?.getTracks().forEach(t => t.stop());
@@ -220,7 +223,10 @@ const CameraScanner: React.FC<Props> = ({ onClose, onResult }) => {
         playsInline
         muted
         onCanPlay={() => setCameraReady(true)}
-        style={S.video}
+        style={{
+          ...S.video,
+          transform: facingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)'
+        }}
       />
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
@@ -230,7 +236,16 @@ const CameraScanner: React.FC<Props> = ({ onClose, onResult }) => {
         <div style={S.header}>
           <button onClick={handleClose} style={S.closeBtn}>✕</button>
           <h3 style={{ color: 'white', margin: 0, fontSize: 16 }}>Escáner de Comida</h3>
-          <button onClick={() => setMode('upload')} style={S.modeBtn}>🖼️ Subir</button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              onClick={() => setFacingMode(prev => prev === 'environment' ? 'user' : 'environment')} 
+              style={S.modeBtn}
+              title="Cambiar cámara"
+            >
+              🔄
+            </button>
+            <button onClick={() => setMode('upload')} style={S.modeBtn}>🖼️ Subir</button>
+          </div>
         </div>
 
         {/* Guide box */}
